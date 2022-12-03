@@ -13,5 +13,5 @@ day1 = do
     contents <- readFile fp
     let cals = splitOn [""] (lines contents)
     let sortedCals = sortOn negate $ map (sum . map read) cals :: [Int]
-    print $ "Part 1: " ++ show (head sortedCals)
-    print $ "Part 2: " ++ show (sum $ take 3 sortedCals)
+    putStrLn $ "Part 1: " ++ show (head sortedCals)
+    putStrLn $ "Part 2: " ++ show (sum $ take 3 sortedCals)

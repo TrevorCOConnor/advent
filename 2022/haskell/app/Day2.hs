@@ -89,5 +89,5 @@ day2 = do
     contents <- readFile fp
     let part1 = sum $ map (toRound1 . words) $ lines contents
     let part2 = sum $ map (toRound2 . words) $ lines contents
-    print $ "Part 1: " ++ show part1
-    print $ "Part 2: " ++ show part2
+    putStrLn $ "Part 1: " ++ show part1
+    putStrLn $ "Part 2: " ++ show part2
