@@ -7,9 +7,13 @@ import Control.Monad
 -- Local
 import Day1
 import Day2
+import Day3
+import Data.Char (toLower)
 
 main :: IO ()
 main = do
     args <- getArgs
-    when ("Day1" `elem` args) day1
-    when ("Day2" `elem` args) day2
+    let args' = map (map toLower) args
+    when ("day1" `elem` args) day1
+    when ("day2" `elem` args) day2
+    when ("day3" `elem` args) day3
