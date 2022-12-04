@@ -9,6 +9,7 @@ pub fn day1() {
                 .map(|x| x.parse::<i32>().unwrap_or(0)).sum()
         }).collect();
     summations.sort_by_key(|x| -x);
+    println!("Day 1:");
     println!("Part 1: {:?}", summations[0]);
     println!("Part 2: {:?}", summations[..2].iter().sum::<i32>());
 }

@@ -33,5 +33,6 @@ day4 = do
     let pairs = map toRangePair $ lines contents
     let part1 = length $ filter (uncurry completeOverlap) pairs
     let part2 = length $ filter (uncurry overlap) pairs
+    putStrLn "Day 4:"
     putStrLn $ "Part 1: " ++ show part1
     putStrLn $ "Part 2: " ++ show part2

@@ -15,7 +15,7 @@ main :: IO ()
 main = do
     args' <- getArgs
     let args = map (map toLower) args'
-    when ("day1" `elem` args) day1
-    when ("day2" `elem` args) day2
-    when ("day3" `elem` args) day3
-    when ("day4" `elem` args) day4
+    when ("day1" `elem` args || null args) day1
+    when ("day2" `elem` args || null args) day2
+    when ("day3" `elem` args || null args) day3
+    when ("day4" `elem` args || null args) day4

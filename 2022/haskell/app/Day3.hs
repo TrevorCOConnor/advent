@@ -35,5 +35,6 @@ day3 = do
     contents <- readFile fp
     let part1 = sum $ map (rucksackPriority . rucksackParse) $ lines contents
     let part2 = sum $ map (rucksackPriority . rucksackGroupParse) $ groupInto 3 $ lines contents
+    putStrLn "Day 3:"
     putStrLn $ "Part 1: " ++ show part1
     putStrLn $ "Part 2: " ++ show part2
