@@ -3,13 +3,14 @@ module Main where
 -- Standard
 import System.Environment
 import Control.Monad
+import Data.Char (toLower)
 
 -- Local
 import Day1
 import Day2
 import Day3
 import Day4
-import Data.Char (toLower)
+import Day5
 
 main :: IO ()
 main = do
@@ -19,3 +20,4 @@ main = do
     when ("day2" `elem` args || null args) day2
     when ("day3" `elem` args || null args) day3
     when ("day4" `elem` args || null args) day4
+    when ("day5" `elem` args || null args) day5
