@@ -12,6 +12,7 @@ import Day3
 import Day4
 import Day5
 import Day6
+import Day7
 
 main :: IO ()
 main = do
@@ -23,3 +24,4 @@ main = do
     when ("day4" `elem` args || null args) day4
     when ("day5" `elem` args || null args) day5
     when ("day6" `elem` args || null args) day6
+    when ("day7" `elem` args || null args) day7
