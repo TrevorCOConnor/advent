@@ -1,8 +1,8 @@
 module Day7 (day7) where
 
-import Data.List
-import Data.List.Split
-import Text.Regex.Posix
+import           Data.List
+import           Data.List.Split
+import           Text.Regex.Posix
 
 
 fp :: FilePath
@@ -31,23 +31,32 @@ buildDir ls = head contents
           buildDirContents :: [String] -> ([String], [File])
           buildDirContents [] = ([], [])
           buildDirContents (l:ls)
-            | "$ cd .." `isPrefixOf` l = (ls, [])
-            | "$ cd " `isPrefixOf` l = let (rem', contents') = buildDirContents rem
-                                           (_, _, name) = l =~ "\\$ cd " :: (String, String, String)
-                                       in (rem', Directory name contents : contents')
-            | "dir " `isPrefixOf` l || "$ ls" == l = buildDirContents ls
-            | l =~ "[0-9]+ [A-Za-z.]+" = let args = splitOn " " l in (rem, File (last args) (read $ head args) : contents)
+            | "$ cd .." `isPrefixOf` l             = (ls, [])
+            | "$ cd " `isPrefixOf` l = handleDir l ls
+            | "dir " `isPrefixOf` l = buildDirContents ls
+            | "$ ls" == l = buildDirContents ls
+            | l =~ "[0-9]+ [A-Za-z.]+" = handleFile l ls
             | otherwise = error $ "unrecognized command" ++ show l
-              where (rem, contents) = buildDirContents ls
+
+          handleDir :: String -> [String] -> ([String], [File])
+          handleDir l ls = (rem', Directory name contents : contents')
+            where (rem, contents) = buildDirContents ls
+                  (rem', contents') = buildDirContents rem
+                  (_, _, name) = l =~ "\\$ cd " :: (String, String, String)
+
+          handleFile :: String -> [String] -> ([String], [File])
+          handleFile l ls = (rem, File (last args) (read $ head args) : contents)
+            where args = splitOn " " l
+                  (rem, contents) = buildDirContents ls
 
 
 fileSize :: File -> Int
 fileSize (Directory name contents) = sum $ map fileSize contents
-fileSize (File name s) = s
+fileSize (File name s)             = s
 
 
 allDirectories :: File -> [File]
-allDirectories File {} = []
+allDirectories File {}                  = []
 allDirectories d@(Directory _ contents) = d : concatMap allDirectories contents
 
 
