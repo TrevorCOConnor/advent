@@ -69,6 +69,6 @@ day8 = do
         maxes = findMaxes treemap
         part1 = length $ M.filterWithKey (isVisible treemap maxes) treemap
         part2 = maximum $ M.mapWithKey (visabilityScore treemap maxes) treemap
-    putStrLn "Day 7:"
+    putStrLn "Day 8:"
     putStrLn $ "Day 1: " ++ show part1
     putStrLn $ "Day 2: " ++ show part2
