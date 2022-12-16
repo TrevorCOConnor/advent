@@ -88,13 +88,14 @@ parseOperation line = applyArgument arg $ operator op
 
 
 -- Turn Related Functions
-handleItem :: Stress -> Monkey -> Int -> (Int, Int)
-handleItem stress monkey item = if passedTest
-                          then (monkeyTrue monkey, newItem)
-                          else (monkeyFalse monkey, newItem)
+handleItem :: Int -> Stress -> Monkey -> Int -> (Int, Int)
+handleItem space stress monkey item = if passedTest
+                          then (monkeyTrue monkey, modItem)
+                          else (monkeyFalse monkey, modItem)
     where operated = monkeyOperation monkey item
           newItem = if stress then operated else operated `div` 3
-          passedTest = newItem `mod` monkeyTest monkey == 0
+          modItem = newItem `mod` space
+          passedTest = modItem `mod` monkeyTest monkey == 0
 
 
 removeItemsFromMonkey :: Monkey -> Monkey
@@ -105,8 +106,8 @@ addItemToMonkey :: Int -> Monkey -> Monkey
 addItemToMonkey item monkey = monkey { monkeyItems=monkeyItems monkey ++ [item] }
 
 
-monkeyTurn :: Stress -> Counter Monkey -> MonkeyMap -> MonkeyMap
-monkeyTurn stress monkeycounter monkeyMap = foldr passItem newMap items
+monkeyTurn :: Int -> Stress -> Counter Monkey -> MonkeyMap -> MonkeyMap
+monkeyTurn space stress monkeycounter monkeyMap = foldr passItem newMap items
     where monkey = fromCounter monkeycounter
           items = monkeyItems monkey
           newMap = M.adjust (count (length items) . fmap removeItemsFromMonkey)
@@ -114,11 +115,11 @@ monkeyTurn stress monkeycounter monkeyMap = foldr passItem newMap items
 
           passItem :: Int -> MonkeyMap -> MonkeyMap
           passItem item mm = M.adjust (fmap (addItemToMonkey newItem)) newMonkey mm
-            where (newMonkey, newItem) = handleItem stress monkey item
+            where (newMonkey, newItem) = handleItem space stress monkey item
 
 
-monkeyRound :: Stress -> MonkeyMap -> MonkeyMap
-monkeyRound stress mmap = foldl (\mm k -> monkeyTurn stress (mm M.! k) mm)
+monkeyRound :: Int -> Stress -> MonkeyMap -> MonkeyMap
+monkeyRound space stress mmap = foldl (\mm k -> monkeyTurn space stress (mm M.! k) mm)
                             mmap $ M.keys mmap
 
 
@@ -128,11 +129,11 @@ day11 = do
     let
         monkeys = map parseMonkey $ splitOn [""] $ lines contents
         monkeyMap = createMonkeyMap monkeys
-        part1rounds = iterate (monkeyRound False) monkeyMap
-        part2rounds = iterate (monkeyRound True) monkeyMap
+        space = product $ map monkeyTest monkeys
+        part1rounds = iterate (monkeyRound space False) monkeyMap
+        part2rounds = iterate (monkeyRound space True) monkeyMap
         part1 = product $ take 2 $ sortOn negate $ map toCount $ M.elems $ part1rounds !! 20
-        part2 = "todo"
-        -- part2 = take 4 $ sortOn negate $ map toCount $ M.elems $ part2rounds !! 1000
+        part2 = product $ take 2 $ sortOn negate $ map toCount $ M.elems $ part2rounds !! 10000
     print monkeys
     putStrLn "Day 11:"
     putStrLn $ "Day 1: " ++ show part1
