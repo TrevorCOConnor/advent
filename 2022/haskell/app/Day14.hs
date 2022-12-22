@@ -1,17 +1,17 @@
 module Day14 (day14) where
 
 import Data.List.Split
+import qualified Data.Map as M
 
 fp :: FilePath
 fp = "../data/Day14.txt"
 
 type Location = (Int, Int)
 
-data Collection = Collection { fallen :: [Location], walls :: [Location] }
+type FallenMap = M.Map Int [Int]
 
-
-data Fallen = Landed Collection
-            | Terminated Collection
+data Fallen = Landed FallenMap
+            | Terminated FallenMap
 
 
 startPoint :: Location
@@ -52,44 +52,36 @@ dropLocations :: Location -> (Location, Location, Location)
 dropLocations loc = (dropLoc loc, dropLoc . leftLoc $ loc, dropLoc . rightLoc $ loc)
 
 
-fallAbyss :: Int -> Location -> Collection -> Fallen
-fallAbyss max loc collection
-    | snd loc >= max = Terminated collection
-    | dropped `notElem` fallen collection ++ walls collection =
-        fallAbyss max dropped collection
-    | lefted `notElem` fallen collection ++ walls collection =
-        fallAbyss max lefted collection
-    | righted `notElem` fallen collection ++ walls collection =
-        fallAbyss max righted collection
-    | otherwise = Landed $ collection {fallen=loc : fallen collection}
+checkIfFallen :: Location -> FallenMap -> Bool
+checkIfFallen (a, b) fallen = b `elem` M.findWithDefault [] a fallen
+
+
+markFallen :: Location -> FallenMap -> FallenMap
+markFallen (a, b) = M.insertWith (++) a [b]
+
+
+fallAbyss :: Int -> Location -> FallenMap -> Fallen
+fallAbyss max loc fallen
+    | snd loc >= max = Terminated fallen
+    | not $ checkIfFallen dropped fallen = fallAbyss max dropped fallen
+    | not $ checkIfFallen lefted fallen = fallAbyss max lefted fallen
+    | not $ checkIfFallen righted fallen = fallAbyss max righted fallen
+    | otherwise = Landed $ markFallen loc fallen
     where (dropped, lefted, righted) = dropLocations loc
 
 
-fallFloor :: Int -> Location -> Location -> Collection -> Fallen
-fallFloor max start loc collection
-    | loc == start && start `elem` fallen collection = Terminated collection
-    | snd dropped == max + 2 = Landed $ collection { fallen=loc : fallen collection}
-    | dropped `notElem` fallen collection ++ walls collection =
-        fallFloor max start dropped collection
-    | lefted `notElem` fallen collection ++ walls collection =
-        fallFloor max start lefted collection
-    | righted `notElem` fallen collection ++ walls collection =
-        fallFloor max start righted collection
-    | otherwise = Landed $ collection {fallen=loc : fallen collection}
+fallFloor :: Int -> Location -> Location -> FallenMap -> Fallen
+fallFloor max start loc fallen
+    | loc == start && checkIfFallen start fallen = Terminated fallen
+    | snd dropped == max + 2 = Landed $ markFallen loc fallen
+    | not $ checkIfFallen dropped fallen = fallFloor max start dropped fallen
+    | not $ checkIfFallen lefted fallen = fallFloor max start lefted fallen
+    | not $ checkIfFallen righted fallen = fallFloor max start righted fallen
+    | otherwise = Landed $ markFallen loc fallen
     where (dropped, lefted, righted) = dropLocations loc
 
 
-countSandIO :: (Collection -> Fallen) -> Int -> Collection -> IO Int
-countSandIO fallFunc num collection =
-    case fell of
-      Landed new -> do
-          print num
-          countSandIO fallFunc (num + 1) new
-      Terminated new -> return num
-    where fell = fallFunc collection
-
-
-buildCollection :: (Collection -> Fallen) -> Collection -> Collection
+buildCollection :: (FallenMap -> Fallen) -> FallenMap -> FallenMap
 buildCollection fallFunc collection =
     case fell of
       Landed new -> do
@@ -102,15 +94,13 @@ day14 :: IO ()
 day14 = do
     contents <- readFile fp
     let
-        collection = Collection [] $ concatMap createLine $ lines contents
-        collectionMax = maximum $ map snd $ walls collection
-        -- part1 = countSand (fallAbyss collectionMax startPoint) collection
-        -- part2 = countSand (fallFloor collectionMax startPoint startPoint) collection
-        first = buildCollection (fallAbyss collectionMax startPoint) collection
-        part1 = length $ fallen first
-        -- second = buildCollection (fallFloor collectionMax startPoint startPoint) first
-        -- part2 = length $ fallen second
-    countSandIO (fallFloor collectionMax startPoint startPoint) 0 collection
+        walls = concatMap createLine $ lines contents
+        fallenMap = foldl (flip markFallen) M.empty walls
+        fallenMax = maximum $ concat $ M.elems fallenMap
+        first = buildCollection (fallAbyss fallenMax startPoint) fallenMap
+        part1 = length (concat $ M.elems first) - length walls
+        second = buildCollection (fallFloor fallenMax startPoint startPoint) first
+        part2 = length (concat $ M.elems second) - length walls
     putStrLn "Day 14:"
-    -- putStrLn $ "Day 1: " ++ show part1
-    -- putStrLn $ "Day 2: " ++ show part2
+    putStrLn $ "Day 1: " ++ show part1
+    putStrLn $ "Day 2: " ++ show part2
