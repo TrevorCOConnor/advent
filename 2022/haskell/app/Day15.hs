@@ -4,10 +4,21 @@ module Day15 (day15) where
 import Text.Regex.Posix
 import qualified Data.Set as S
 import Data.List
+import Data.Maybe
 
 type Location = (Int, Int)
 type Range = (Int, Int)
 data Sensor = Sensor {center :: Location, radius :: Int}
+    deriving (Show)
+
+
+part1Column :: Int
+-- part1Column = 10
+part1Column = 2_000_000
+
+part2Max :: Int
+part2Max = 4_000_000
+-- part2Max = 20
 
 
 fp :: FilePath
@@ -26,16 +37,22 @@ dist :: Location -> Location -> Int
 dist (a, b) (c, d) = abs (c - a) + abs (d - b)
 
 
-withinRadius :: Location -> Int -> Int -> (Int, Int)
-withinRadius (a, b) r y = (min m p, max m p)
+rangeWithinRadiusOfY :: Location -> Int -> Int -> Maybe Range
+rangeWithinRadiusOfY (a, b) r y = if dx > 0
+                                     then Just (min m p, max m p)
+                                     else Nothing
     where dy = abs (y - b)
-          dx = abs (r - dy)
+          dx = r - dy
           m = a - dx 
           p = a + dx
 
 
-withinSensor :: Sensor -> Int -> (Int, Int)
-withinSensor sensor = withinRadius (center sensor) (radius sensor)
+rangeWithinSensorOfY :: Sensor -> Int -> Maybe Range
+rangeWithinSensorOfY sensor = rangeWithinRadiusOfY (center sensor) (radius sensor)
+
+
+withinSensor :: Location -> Sensor -> Bool
+withinSensor loc (Sensor cent r) = dist cent loc <= r
 
 
 rangeIntersectionLeft :: Range -> Range -> Bool
@@ -63,20 +80,42 @@ chainLength :: [(Int, Int)] -> Int
 chainLength = sum . map (\(a, b) -> b - a + 1)
 
 
+withinRange :: Int -> Range -> Bool
+withinRange x (a, b) = a <= x && x <= b
+
+
+rangeDifference :: Range -> Range -> Int
+rangeDifference (a, b) (c, d) = min b d + 1
+
+
+checkRow :: [Sensor] -> Int -> [Range]
+checkRow sensors column =
+    foldl addRangeToChain [] $
+        sortBy rangeSort $
+            mapMaybe (`rangeWithinSensorOfY` column) sensors
+
+
+tuning :: Location -> Int
+tuning (x, y) = x * 4_000_000 + y
+
+
 day15 :: IO ()
 day15 = do
     contents <- readFile fp
     let
-        yValue = 2_000_000
         sensorsAndBeacons = map parseSensorsAndBeacons $ lines contents
         sensors = map fst sensorsAndBeacons
         beacons = nub $ map snd sensorsAndBeacons
-        noBeaconsBySensors = chainLength $ foldl addRangeToChain []
-                                         $ sortBy rangeSort
-                                         $ map (`withinSensor` yValue) sensors
-        inlineBeacons = map snd (filter ((== yValue) . snd) beacons)
+        noBeaconsBySensors = chainLength $ sensors `checkRow` part1Column
+        inlineBeacons = map snd (filter ((== part1Column) . snd) beacons)
         part1 = noBeaconsBySensors - length inlineBeacons
-        part2 = "todo"
+
+    let 
+        (range, y) = head $ filter ((> 1) . length . fst) $
+            (`zip` [0..part2Max]) $
+                map (sensors `checkRow`) [0..part2Max]
+        x = rangeDifference (head range) (range !! 1)
+        part2 = tuning (x, y)
     putStrLn "Day 15:"
     putStrLn $ "Day 1: " ++ show part1
     putStrLn $ "Day 2: " ++ show part2
