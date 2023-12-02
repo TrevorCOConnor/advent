@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 static FILE_PATH: &'static str = "../data/day1.txt";
 
 pub fn solutions() {
