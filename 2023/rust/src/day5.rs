@@ -62,7 +62,6 @@ fn text_to_map(text: &str) -> Vec<Vec<(u64, u64, u64)>> {
     maps
 }
 
-
 fn text_to_map_structured(text: &str) -> Vec<Vec<Translation>> {
     let mut maps = Vec::new();
     let mut sub_map = Vec::new();
@@ -91,7 +90,6 @@ fn text_to_map_structured(text: &str) -> Vec<Vec<Translation>> {
     maps
 }
 
-
 #[derive(Clone, Copy, Debug)]
 struct SeedRange {
     number: u64,
@@ -111,60 +109,59 @@ impl SeedRange {
         }
     }
 
+    // Returns (translated_intervals, untranslated_intervals)
+    // Seed interval: (x, y)
+    // Translation interval: (a, b)
+    // If the intervals overlap, then the translated interval is
+    //      (max(a, x), min(b, y)
+    //  and the sub intervals that were not translated are
+    //      (x, a) -- the before chunk
+    //      (b, y) -- the after chunk
+    //  empty intervals are excluded of course
     fn through_translation(
         &self, translation: &Translation
     ) -> (Vec<SeedRange>, Vec<SeedRange>) {
         let (seed_a, seed_b) = self.range();
         let (translation_a, translation_b) = translation.start_range();
 
-        let result = {
-            if translation_a <= seed_a && seed_a <= translation_b
-            {
-                let translated = SeedRange {
-                    number: translation.dest + (seed_a - translation_a),
-                    length: translation_b.min(seed_b) - seed_a 
-                };
-                let untranslated = vec![
-                    SeedRange::try_build_from_range(translation_b, seed_b)
-                ].iter().filter_map(|v| *v).collect_vec();
+        if let Some(mut translated) = SeedRange::try_build_from_range(
+            seed_a.max(translation_a),
+            seed_b.min(translation_b)
+        ) {
+            translated.number = seed_a.checked_sub(translation_a).unwrap_or(0)
+                + translation.dest;
+            let untranslated = [
+                SeedRange::try_build_from_range(
+                    seed_a, translation_a.checked_sub(1).unwrap_or(0)
+                ),
+                SeedRange::try_build_from_range(
+                    translation_b + 1, seed_b
+                )
+            ]
+            .into_iter()
+            .filter_map(|range| range)
+            .collect();
 
-                (vec![translated], untranslated)
-            } else if seed_a <= translation_a && translation_a <= seed_b {
-                let translated = SeedRange {
-                    number: translation.dest,
-                    length: seed_b.min(translation_b) - translation_a
-                };
-                let untranslated = vec![
-                    SeedRange::try_build_from_range(seed_a, translation_a),
-                    SeedRange::try_build_from_range(translation_b, seed_b),
-                ].iter().filter_map(|v| *v).collect_vec();
+            (vec![translated], untranslated)
+        } else {
+            (vec![], vec![self.to_owned()])
+        }
 
-                (vec![translated], untranslated)
-            } else {
-                (vec![], vec![*self])
-            }
-        };
-        result
     }
 
-    fn through_map_fold(
-        &self,
-        map: &[Translation]
-    ) -> Vec<SeedRange> {
-        let init_todo = vec![*self];
-        let init_completed = Vec::new();
-        let (mut translated, untranslated) = map
-            .iter()
-            .fold( (init_completed, init_todo), |(mut done, todo), translation| {
-                let (new_completed, new_todo): (Vec<Vec<SeedRange>>, Vec<Vec<SeedRange>>) = todo
-                    .iter()
-                    .map(|range| range.through_translation(translation))
-                    .unzip();
-                done.extend(new_completed.into_iter().flatten().collect::<Vec<SeedRange>>());
-                (done, new_todo.into_iter().flatten().collect())
-            });
-        translated.extend(untranslated);
-        translated
+    // Recursively iterate through translations, breaking off the untranslated intervals
+    // and sending those through the remaining translations
+    fn through_map(&self, map: &[Translation]) -> Vec<SeedRange> {
+        if let Some((translation, rem)) = map.split_first() {
+            let (mut translated, untranslated) = self.through_translation(translation);
+            let rem_translated: Vec<SeedRange> = untranslated
+                .into_iter()
+                .map(|range| range.through_map(rem))
+                .flatten()
+                .collect();
+            translated.extend(rem_translated);
+            translated
+        } else { vec![*self] }
     }
 
     fn through_maps(&self, maps: &[Vec<Translation>]) -> Vec<SeedRange> {
@@ -173,7 +170,7 @@ impl SeedRange {
             .fold( init, |acc, map| {
                 let result = acc
                     .iter()
-                    .map(|range| range.through_map_fold(map))
+                    .map(|range| range.through_map(map))
                     .flatten()
                     .collect_vec();
                 result
@@ -294,3 +291,4 @@ humidity-to-location map:
         assert_eq!(answer, 46);
     }
 }
+
