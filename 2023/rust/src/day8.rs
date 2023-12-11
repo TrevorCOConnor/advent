@@ -10,7 +10,6 @@ pub fn solutions() {
     println!("Day 8");
     part1(&contents);
     part2(&contents);
-    println!("Done");
 }
 
 enum Direction {
