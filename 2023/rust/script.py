@@ -1,24 +1,54 @@
 import os
 
+start = 13
+
 def files_setup():
-    for i in range(1, 26):
-        file_contents = f"""static FILE_PATH: &'static str = "../data/Day{i}.txt";
+    for i in range(start, 26):
+        file_contents = f"""static FILE_PATH: &'static str = "../data/day{i}.txt";
 
-    pub fn solutions() {{
-        println!("Day {i}");
-        part1();
-        part2();
-    }}
+pub fn solutions() {{
+    let contents = std::fs::read_to_string(
+        FILE_PATH
+    ).expect("Broken File");
+    println!("Day {i}");
+    part1(&contents);
+    part2(&contents);
+}}
 
-    fn part1() {{
-        let answer = "TODO";
-        println!("Part 1: {{}}", answer)
-    }}
+fn part1(contents: &str) -> usize {{
+    let answer = 0;
+    // println!("Part 1: {{}}", answer);
+    println!("Part 1: TODO");
+    answer
+}}
 
-    fn part2() {{
-        let answer = "TODO";
-        println!("Part 2: {{}}", answer)
-    }}
+fn part2(contents: &str) -> usize {{
+    let answer = 0;
+    // println!("Part 2: {{}}", answer);
+    println!("Part 2: TODO");
+    answer
+}}
+
+#[cfg(test)]
+mod test {{
+    use super::{{part1, part2}};
+
+    static DATA: &'static str = "
+";
+
+// #[test]
+fn test_part1() {{
+    let answer = part1(DATA);
+    assert_eq!(answer, 0);
+}}
+
+// #[test]
+fn test_part2() {{
+    let answer = part2(DATA);
+    assert_eq!(answer, 0);
+}}
+
+}}
     """
         with open(f"src/day{i}.rs", "w") as f:
             f.write(file_contents)
@@ -28,7 +58,7 @@ def files_setup():
 
 def main_setup():
     contents = ""
-    for i in range(1, 26):
+    for i in range(start, 26):
         contents += f"mod day{i};\n"
 
     contents += """
@@ -55,4 +85,4 @@ fn main() {
     with open("src/main.rs", "w") as f:
         f.write(contents)
 
-main_setup()
+files_setup()
