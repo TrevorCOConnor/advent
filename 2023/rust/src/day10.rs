@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, fmt::Display};
 
 static FILE_PATH: &'static str = "../data/day10.txt";
 
@@ -18,7 +18,21 @@ enum Pipe {
     LeftUp,
     LeftDown,
     RightUp,
-    RightDown
+    RightDown,
+}
+
+impl Display for Pipe {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Pipe::Start => write!(f, "S"),
+            Pipe::Horizontal => write!(f, "-"),
+            Pipe::Vertical => write!(f, "|"),
+            Pipe::LeftUp => write!(f, "L"),
+            Pipe::LeftDown => write!(f, "F"),
+            Pipe::RightUp => write!(f, "J"),
+            Pipe::RightDown => write!(f, "7"),
+        }
+    }
 }
 
 impl Pipe {
@@ -137,6 +151,19 @@ impl Position {
 
 #[derive(Debug)]
 struct Grid<T>(Vec<Vec<T>>);
+
+impl<T: Display> Display for Grid<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut display = String::new();
+        for row in &self.0 {
+            for col in row {
+                display.push_str(&format!("{col}"));
+            }
+            display.push_str("\n");
+        }
+        write!(f, "{display}")
+    }
+}
 
 impl<T> Grid<T> {
     fn get(&self, position: &Position) -> Option<&T> {
@@ -258,7 +285,8 @@ impl Grid<Option<Pipe>> {
             expanded.push(expanded_row);
             expanded.push(new_row);
         };
-        Grid(expanded)
+        let res = Grid(expanded);
+        res
     }
 
     fn count_internal_positions(self) -> usize {
@@ -336,6 +364,16 @@ enum Orientation {
     Internal,
     External,
     Border,
+}
+
+impl Display for Orientation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Orientation::Internal => write!(f, "."),
+            Orientation::External => write!(f, "E"),
+            Orientation::Border => write!(f, "#"),
+        }
+    }
 }
 
 impl Orientation {
