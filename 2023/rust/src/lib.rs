@@ -1,4 +1,4 @@
-#[derive(Eq, PartialEq, Clone, Copy)]
+#[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
 pub enum Direction {
     Up,
     Down,
@@ -14,6 +14,14 @@ impl Direction {
             Direction::Left,
             Direction::Right,
         ]
+    }
+
+    pub fn perpendicular(&self) -> (Direction, Direction) {
+        if *self == Direction::Up || *self == Direction::Down {
+            (Direction::Left, Direction::Right)
+        } else {
+            (Direction::Up, Direction::Down)
+        }
     }
 }
 
@@ -49,5 +57,31 @@ impl Position {
             .into_iter()
             .flatten()
             .collect()
+    }
+}
+
+
+pub struct Matrix<A> {
+    matrix: Vec<Vec<A>>
+}
+
+impl<A: std::fmt::Debug> Matrix<A> {
+    pub fn get(&self, pos: &Position) -> Option<&A> {
+        self.matrix.get(pos.y)?.get(pos.x)
+    }
+
+    pub fn build(matrix: Vec<Vec<A>>) -> Matrix<A> {
+        Matrix { matrix }
+    }
+
+    pub fn rows(&self) -> usize {
+        self.matrix.len()
+    }
+
+    pub fn cols(&self) -> usize {
+        self.matrix
+            .get(0)
+            .map(|r| r.len())
+            .unwrap_or(0)
     }
 }
