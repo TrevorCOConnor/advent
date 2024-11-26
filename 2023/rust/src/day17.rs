@@ -294,7 +294,7 @@ mod test {
         assert_eq!(answer, 102);
     }
 
-    // #[test]
+    #[test]
     fn test_part2() {
         let answer = part2(DATA);
         assert_eq!(answer, 94);
