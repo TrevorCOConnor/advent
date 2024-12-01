@@ -18,7 +18,7 @@ fn read_data(contents: &str) -> (Vec<u32>, Vec<u32>) {
     (left, right)
 }
 
-fn calculuate_list_diff(left: &[u32], right: &[u32]) -> u32 {
+fn calculate_list_diff(left: &[u32], right: &[u32]) -> u32 {
     let mut left_sort = left.to_owned();
     left_sort.sort();
 
@@ -30,7 +30,7 @@ fn calculuate_list_diff(left: &[u32], right: &[u32]) -> u32 {
         .sum()
 }
 
-fn calculuate_list_sim(left: &[u32], right: &[u32]) -> u32 {
+fn calculate_list_sim(left: &[u32], right: &[u32]) -> u32 {
     let mut left_sort = left.to_owned();
     left_sort.sort();
 
@@ -38,15 +38,33 @@ fn calculuate_list_sim(left: &[u32], right: &[u32]) -> u32 {
     right_sort.sort();
 
     let mut sum = 0u32;
+    // Track location in right list
+    // This is only useful because the list is sorted
+    let mut idx = 0usize;
 
     for item in left_sort {
-        // Takes advantage of sorted lists
-        let count = right_sort.iter()
-            // Skip lower numbers
-            .skip_while(|&&r| item > r)
-            // Count all equal numbers, and then stop
-            .take_while(|&&r| item == r).count() as u32;
-        sum += count * item;
+        // Find index of matching item in right list
+        let new_idx = right_sort[idx..]
+            .iter()
+            .position(|e| *e == item);
+
+        // If matching item, count items
+        if let Some(n_idx) = new_idx {
+            idx = idx + n_idx;
+            let count = right_sort[idx..]
+                .iter()
+                .take_while(|e| **e == item)
+                .count();
+            sum += (count as u32) * item;
+        }
+
+        // // Takes advantage of sorted lists
+        // let count = right_sort.iter()
+        //     // Skip lower numbers
+        //     .skip_while(|&&r| item > r)
+        //     // Count all equal numbers, and then stop
+        //     .take_while(|&&r| item == r).count() as u32;
+        // sum += count * item;
     }
 
     sum
@@ -63,14 +81,14 @@ pub fn solutions() {
 
 fn part1(contents: &str) -> u32 {
     let (left, right) = read_data(contents);
-    let answer = calculuate_list_diff(&left, &right);
+    let answer = calculate_list_diff(&left, &right);
     println!("Part 1: {}", answer);
     answer
 }
 
 fn part2(contents: &str) -> u32 {
     let (left, right) = read_data(contents);
-    let answer = calculuate_list_sim(&left, &right);
+    let answer = calculate_list_sim(&left, &right);
     println!("Part 2: {}", answer);
     answer
 }
