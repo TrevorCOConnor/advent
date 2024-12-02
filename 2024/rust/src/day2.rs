@@ -33,9 +33,6 @@ fn validate_report(report: &[i32]) -> bool {
 }
 
 fn validate_report_with_dampener(report: &[i32]) -> bool {
-    if report.len() < 2 {
-        return true;
-    }
     if validate_report(report) {
         return true;
     }
