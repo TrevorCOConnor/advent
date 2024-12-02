@@ -1,9 +1,7 @@
 static FILE_PATH: &'static str = "../data/day2.txt";
 
 pub fn solutions() {
-    let contents = std::fs::read_to_string(
-        FILE_PATH
-    ).expect("Broken File");
+    let contents = std::fs::read_to_string(FILE_PATH).expect("Broken File");
     println!("Day 2");
     part1(&contents);
     part2(&contents);
@@ -12,40 +10,39 @@ pub fn solutions() {
 fn parse_data(data: &str) -> Vec<Vec<i32>> {
     data.lines()
         .filter(|l| !l.is_empty())
-        .map(
-            |l| l.split(" ").map(|num| num.parse::<i32>().expect("Not a number!")).collect()
-        ).collect()
+        .map(|l| {
+            l.split(" ")
+                .map(|num| num.parse::<i32>().expect("Not a number!"))
+                .collect()
+        })
+        .collect()
 }
 
 fn validate_report(report: &[i32]) -> bool {
     if report.len() < 2 {
-        return true
+        return true;
     }
     let sign = (report[0] - report[1]).signum();
-    report.iter()
-        .zip(report[1..].iter())
-        .all(|(fst, snd)| {
-            let diff = fst - snd;
-            // Diff is not greater than 3
-            // Sign (asc/ desc) remains the same
-            diff.abs() <= 3 && diff.signum() * sign == 1
-        })
+    report.iter().zip(report[1..].iter()).all(|(fst, snd)| {
+        let diff = fst - snd;
+        // Diff is not greater than 3
+        // Sign (asc/ desc) remains the same
+        diff.abs() <= 3 && diff.signum() * sign == 1
+    })
 }
 
 fn validate_report_with_dampener(report: &[i32]) -> bool {
     if validate_report(report) {
         return true;
     }
-    let analyzed_report = report.iter()
-        .zip(report[1..].iter())
-        .map(|(fst, snd)| {
-            let diff = snd - fst;
-            if diff.abs() > 3 {
-                0
-            } else {
-                diff.signum()
-            }
-        });
+    let analyzed_report = report.iter().zip(report[1..].iter()).map(|(fst, snd)| {
+        let diff = snd - fst;
+        if diff.abs() > 3 {
+            0
+        } else {
+            diff.signum()
+        }
+    });
 
     let mut neg = Vec::new();
     let mut pos = Vec::new();
@@ -54,11 +51,11 @@ fn validate_report_with_dampener(report: &[i32]) -> bool {
         match diff {
             -1 => neg.push(idx),
             1 => pos.push(idx),
-            _ => zero.push(idx)
+            _ => zero.push(idx),
         }
     }
 
-    let mut discrepancies =  {
+    let mut discrepancies = {
         if neg.len() >= pos.len() {
             pos
         } else {
@@ -71,22 +68,29 @@ fn validate_report_with_dampener(report: &[i32]) -> bool {
     // the report could potentially be fixed
     // We're not going to check if the two are neighboring though
     if discrepancies.len() > 2 {
-        return false
+        return false;
     }
 
     for idx in discrepancies {
-        let first = report[..idx].iter().cloned().chain(report[idx+1..].iter().cloned()).collect::<Vec<i32>>();
+        let first = report[..idx]
+            .iter()
+            .chain(report[idx + 1..].iter())
+            .cloned()
+            .collect::<Vec<i32>>();
         if validate_report(&first) {
             return true;
         }
-        let second = report[..idx+1].iter().cloned().chain(report[idx+2..].iter().cloned()).collect::<Vec<i32>>();
+        let second = report[..idx + 1]
+            .iter()
+            .chain(report[idx + 2..].iter())
+            .cloned()
+            .collect::<Vec<i32>>();
         if validate_report(&second) {
             return true;
         }
     }
 
     false
-
 }
 
 fn part1(contents: &str) -> usize {
@@ -98,7 +102,10 @@ fn part1(contents: &str) -> usize {
 
 fn part2(contents: &str) -> usize {
     let reports = parse_data(contents);
-    let answer = reports.iter().filter(|r| validate_report_with_dampener(r)).count();
+    let answer = reports
+        .iter()
+        .filter(|r| validate_report_with_dampener(r))
+        .count();
     println!("Part 2: {}", answer);
     answer
 }
@@ -125,6 +132,4 @@ mod test {
         let answer = part2(DATA);
         assert_eq!(answer, 4);
     }
-
 }
-    
