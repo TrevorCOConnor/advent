@@ -1,9 +1,12 @@
-use std::fmt::Display;
+use std::{
+    fmt::Display,
+    ops::{Add, Sub},
+};
 
 #[derive(Clone)]
 pub struct Matrix<T>(Vec<Vec<T>>);
 
-#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, PartialOrd, Ord)]
 pub struct Position {
     pub x: usize,
     pub y: usize,
@@ -110,6 +113,35 @@ impl Position {
                     y: self.y + 1,
                 })
             }
+        }
+    }
+
+    pub fn dist(&self, rhs: &Self) -> usize {
+        let value = rhs.x.abs_diff(self.x).pow(2) + rhs.y.abs_diff(self.y).pow(2);
+        let dist = (value as f32).sqrt().round();
+        dist as usize
+    }
+
+    pub fn scale(&self, scalar: usize) -> Self {
+        Position {
+            x: scalar * self.x,
+            y: scalar * self.y,
+        }
+    }
+
+    pub fn checked_sub(self, rhs: Self) -> Option<Position> {
+        let x = self.x.checked_sub(rhs.x)?;
+        let y = self.y.checked_sub(rhs.y)?;
+        Some(Position { x, y })
+    }
+}
+
+impl Add for Position {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        Position {
+            x: rhs.x + self.x,
+            y: rhs.y + self.y,
         }
     }
 }
