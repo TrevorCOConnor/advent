@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 static FILE_PATH: &'static str = "../data/day9.txt";
 
 pub fn solutions() {
@@ -118,7 +116,6 @@ fn reorder_whole_files(file_info: &[FileInfo]) -> Vec<FileInfo> {
                 .enumerate()
                 .find(|(_, f)| f.file_id.is_none() && f.length >= item.length)
             {
-                files.get_mut(rev_idx).unwrap().file_id.take();
                 files.remove(empty_idx);
                 let rem = empty_space.difference(&item);
                 if rem.length > 0 {
@@ -179,4 +176,3 @@ mod test {
         assert_eq!(answer, 2858);
     }
 }
-
