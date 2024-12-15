@@ -1,5 +1,5 @@
 use std::{
-    fmt::Display,
+    fmt::{Debug, Display},
     ops::{Add, Sub},
 };
 
@@ -147,6 +147,14 @@ impl Add for Position {
 }
 
 impl<T> Matrix<T> {
+    pub fn num_rows(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn num_cols(&self) -> usize {
+        self.0.first().map(|row| row.len()).unwrap_or(0)
+    }
+
     pub fn new(rows: Vec<Vec<T>>) -> Self {
         Matrix(rows)
     }
@@ -160,6 +168,20 @@ impl<T> Matrix<T> {
                     .enumerate()
                     .map(|(x, val)| (Position { x, y }, val))
                     .collect::<Vec<(Position, &T)>>()
+            })
+            .flatten()
+            .collect()
+    }
+
+    pub fn values_mut(&mut self) -> Vec<(Position, &mut T)> {
+        self.0
+            .iter_mut()
+            .enumerate()
+            .map(|(y, row)| {
+                row.iter_mut()
+                    .enumerate()
+                    .map(|(x, val)| (Position { x, y }, val))
+                    .collect::<Vec<(Position, &mut T)>>()
             })
             .flatten()
             .collect()
@@ -222,6 +244,20 @@ impl<T: Display> Display for Matrix<T> {
         for row in self.0.iter().rev() {
             for value in row {
                 disp.push_str(&format!("{}", value));
+            }
+            disp.push_str("\n");
+        }
+
+        write!(f, "{}", disp)
+    }
+}
+
+impl<T: Debug> Debug for Matrix<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut disp = String::new();
+        for row in self.0.iter().rev() {
+            for value in row {
+                disp.push_str(&format!("{:?}", value));
             }
             disp.push_str("\n");
         }
