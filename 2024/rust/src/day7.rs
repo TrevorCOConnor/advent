@@ -1,5 +1,3 @@
-use std::result;
-
 static FILE_PATH: &'static str = "../data/day7.txt";
 
 pub fn solutions() {
@@ -151,4 +149,3 @@ mod test {
         assert_eq!(answer, 11387);
     }
 }
-

@@ -1,7 +1,5 @@
 static FILE_PATH: &'static str = "../data/day4.txt";
 
-use std::ascii::AsciiExt;
-
 use rust::{Direction, Matrix, Position};
 
 pub fn solutions() {
@@ -13,11 +11,12 @@ pub fn solutions() {
 
 fn read_data(contents: &str) -> Matrix<char> {
     Matrix::new(
-        contents.lines()
+        contents
+            .lines()
             .filter(|l| !l.is_empty())
             .map(|l| l.chars().collect())
             .rev()
-            .collect()
+            .collect(),
     )
 }
 
@@ -44,8 +43,14 @@ fn check_x(matrix: &Matrix<char>, pos: &Position) -> bool {
     let mut left_diagonal = (false, false);
     let mut right_diagonal = (false, false);
     for (diagonal, dirs) in [
-        (&mut left_diagonal, [Direction::NorthWest, Direction::SouthEast]),
-        (&mut right_diagonal, [Direction::NorthEast, Direction::SouthWest])
+        (
+            &mut left_diagonal,
+            [Direction::NorthWest, Direction::SouthEast],
+        ),
+        (
+            &mut right_diagonal,
+            [Direction::NorthEast, Direction::SouthWest],
+        ),
     ] {
         for dir in dirs {
             let new_pos = pos.apply_dir(&dir);
