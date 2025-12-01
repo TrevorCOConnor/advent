@@ -4,4 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+num = "0.4.3"
+priority-queue = "2.1.1"
 regex = "1.11.1"
