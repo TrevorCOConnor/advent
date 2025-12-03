@@ -1,4 +1,4 @@
-use rust::day1;
+use rust::*;
 use std::env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -8,6 +8,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if args.contains(&String::from("day1")) || args.is_empty() {
         day1::solution()?;
+    }
+    if args.contains(&String::from("day2")) || args.is_empty() {
+        day2::solution()?;
     }
 
     Ok(())
