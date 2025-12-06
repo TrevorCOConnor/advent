@@ -2,6 +2,7 @@ mod day1;
 mod day2;
 mod day3;
 mod day4;
+mod day5;
 use std::env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,6 +21,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     if args.contains(&String::from("day4")) || args.is_empty() {
         day4::solution()?;
+    }
+    if args.contains(&String::from("day5")) || args.is_empty() {
+        day5::solution()?;
     }
 
     Ok(())

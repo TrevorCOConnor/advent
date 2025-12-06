@@ -23,6 +23,7 @@ fn find_candidates(map: &Matrix<bool>) -> Vec<Position> {
                 && map
                     .value_neighbors_iter(&v.pos)
                     .filter(|n| *n.value)
+                    .take(4)
                     .count()
                     < 4
         })
