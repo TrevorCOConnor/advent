@@ -101,7 +101,7 @@ fn part2(file_contents: &str) -> u64 {
 
 pub fn solution() -> Result<(), Box<dyn std::error::Error>> {
     let contents = std::fs::read_to_string(FILE_PATH)?;
-    println!("Day 1");
+    println!("Day 2");
     let p1 = part1(&contents);
     println!("\tPart 1: {}", p1);
     let p2 = part2(&contents);
