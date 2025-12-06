@@ -1,6 +1,6 @@
 use std::{
     fmt::{Debug, Display},
-    ops::{Add, Sub},
+    ops::Add,
 };
 
 #[derive(Clone)]
